@@ -5,14 +5,18 @@ app: luxswipe
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: ls-backend
 
+plugins:
+  - serverless-dotenv-plugin
+
 stages:
   default:
     params:
-      tableName: "users-table-${sls:stage}"
+      tableName: ${env:TABLE_NAME}
 
 provider:
   name: aws
   runtime: nodejs20.x
+  region: ${env:AWS_REGION_NAME} 
   iam:
     role:
       statements:
@@ -25,26 +29,12 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [UsersTable, Arn]
+            - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${env:TABLE_NAME}
   environment:
-    USERS_TABLE: ${param:tableName}
+    TABLE_NAME: ${env:TABLE_NAME}
 
 functions:
   api:
     handler: handler.handler
     events:
       - httpApi: "*"
-
-resources:
-  Resources:
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        TableName: ${param:tableName}
