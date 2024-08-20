@@ -5,14 +5,6 @@ app: luxswipe
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: ls-backend
 
-plugins:
-  - serverless-dotenv-plugin
-
-stages:
-  default:
-    params:
-      tableName: ${env:TABLE_NAME}
-
 provider:
   name: aws
   runtime: nodejs20.x
@@ -30,11 +22,12 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${env:TABLE_NAME}
+            - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${env:TABLE_NAME}/index/*
   environment:
     TABLE_NAME: ${env:TABLE_NAME}
 
 functions:
   api:
-    handler: handler.handler
+    handler: handler.main
     events:
       - httpApi: "*"
