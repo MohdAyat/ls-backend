@@ -13,7 +13,7 @@ try {
     });
 
     docClient = DynamoDBDocumentClient.from(client);
-    console.log("Successfully connedted to the database...");
+    console.log("Successfully connected to the database...");
     
 } catch (error) {
     console.error("Error initializing DynamoDB client: ", error);

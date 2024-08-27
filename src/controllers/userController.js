@@ -2,18 +2,23 @@ import * as userModel from "../models/userModel.js";
 
 export const checkUsername = async (req, res, next) => {
     try {
-        if (req.params.username.length < 3) {
+        const {username} = req.params;
+        
+        if("0123456789".indexOf(username.charAt(0)) !== -1){
+            res.json({ message: "Username must not start with a number"})
+        }
+        if (username.length < 3) {
             res.json({ message: "Too Short" });
         }
-        const response = await userModel.getUserInfoByUsername(
-            `${req.params.username}`
-        );
+        const response = await userModel.getUserInfoByUsername(`${username}`);
+        
         if (response) {
             res.json({ available: false });
         } else {
             res.json({ available: true });
         }
     } catch (error) {
+        
         next(error);
     }
 };
@@ -50,7 +55,7 @@ export const createUser = async (req, res) => {
 
         //Basic Validation
         if (!userData || Object.keys(userData).length === 0) {
-            return res.status(400).json({ error: "Data not found" });
+            return res.status(400).json({ error: "User Data not found" });
         }
 
         //we can further check that if the required fields are present or not:
