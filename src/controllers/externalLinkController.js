@@ -1,6 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import {getExternalLinkByID ,saveExternalLink} from "../models/externalLinkModel.js";
+import {saveExternalLink} from "../models/externalLinkModel.js";
 import { v4 as uuidv4} from "uuid";
 
 
@@ -15,7 +15,7 @@ export const createExternalLink = async(req,res) => {
     const linkId = uuidv4();
     const data = {
       linkID: linkId,
-      SK: "PROFILELINK",
+      SK: `PROFILELINK${linkId}`,
       createdAt: now,
       updatedAt: now,
       ...linkData
