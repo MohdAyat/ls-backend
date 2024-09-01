@@ -1,24 +1,25 @@
 import * as userModel from "../models/userModel.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const checkUsername = async (req, res, next) => {
     try {
         const {username} = req.params;
         
         if("0123456789".indexOf(username.charAt(0)) !== -1){
-            res.json({ message: "Username must not start with a number"})
+            return res.json({ message: "Username must not start with a number"})
         }
         if (username.length < 3) {
-            res.json({ message: "Too Short" });
+            return res.json({ message: "Too Short" });
         }
         const response = await userModel.getUserInfoByUsername(`${username}`);
         
         if (response) {
-            res.json({ available: false });
+            return res.json({ available: false });
         } else {
-            res.json({ available: true });
+            return res.json({ available: true });
         }
     } catch (error) {
-        
         next(error);
     }
 };
@@ -82,3 +83,30 @@ export const createUser = async (req, res) => {
         });
     }
 };
+
+export const updateUser = async(req,res) => {
+    try {
+        const {name,bio,avatarUrl,coverUrl} = req.body;
+        const {username} = req.params;
+        const updateData = {};
+        if(name) updateData.name = name;
+        if(bio) updateData.bio = bio;
+        if(avatarUrl) updateData.avatarUrl = avatarUrl;
+        if(coverUrl) updateData.coverUrl = coverUrl;
+        
+        if (!updateData || Object.keys(updateData).length === 0) {
+            throw new ApiError(400,"User update data not found");
+        }
+        
+        const updatedUser = await userModel.updateUserInDB(username,updateData);
+        
+        if(!updatedUser){
+            throw new ApiError(501,"udpated user data not found after saving data to DB");
+        }
+    
+        return res.status(201).json(new ApiResponse("User details updated successfully",201,updatedUser));
+    } catch (error) {
+        console.log("Error :",error);
+        throw new ApiError(501,"something went wrong while updating user details in user controllers");
+    }
+}
